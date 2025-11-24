@@ -115,6 +115,97 @@ export async function getWeeklySchedule(weekKey: string): Promise<ScheduleRow[]>
 }
 
 /**
+ * Yeni bir Google Sheet oluşturur ve Config sheet'ini hazırlar
+ */
+export async function createSpreadsheet(): Promise<{ spreadsheetId: string; spreadsheetUrl: string }> {
+  try {
+    const sheetsClient = getSheetsClient();
+
+    // Create new spreadsheet
+    const response = await sheetsClient.spreadsheets.create({
+      requestBody: {
+        properties: {
+          title: 'Şirinyer Sürücü Kursu - Program Takvimi',
+        },
+        sheets: [
+          {
+            properties: {
+              title: 'Config',
+            },
+          },
+        ],
+      },
+    });
+
+    const spreadsheetId = response.data.spreadsheetId!;
+    const spreadsheetUrl = response.data.spreadsheetUrl!;
+
+    // Prepare Config data
+    const configData = [
+      ['key', 'value'],
+      ['work_start', '09:00'],
+      ['work_end', '17:00'],
+      ['slot_duration', '120'],
+      ['trainer_1', 'Ahmet'],
+      ['trainer_2', 'Mehmet'],
+      ['trainer_3', 'Ayşe'],
+      ['trainer_4', 'Zeynep'],
+    ];
+
+    // Write Config data
+    await sheetsClient.spreadsheets.values.update({
+      spreadsheetId,
+      range: 'Config!A1:B10',
+      valueInputOption: 'RAW',
+      requestBody: {
+        values: configData,
+      },
+    });
+
+    // Format header row (bold)
+    await sheetsClient.spreadsheets.batchUpdate({
+      spreadsheetId,
+      requestBody: {
+        requests: [
+          {
+            repeatCell: {
+              range: {
+                sheetId: response.data.sheets![0].properties!.sheetId!,
+                startRowIndex: 0,
+                endRowIndex: 1,
+                startColumnIndex: 0,
+                endColumnIndex: 2,
+              },
+              cell: {
+                userEnteredFormat: {
+                  textFormat: {
+                    bold: true,
+                  },
+                  backgroundColor: {
+                    red: 0.9,
+                    green: 0.9,
+                    blue: 0.9,
+                  },
+                },
+              },
+              fields: 'userEnteredFormat(textFormat,backgroundColor)',
+            },
+          },
+        ],
+      },
+    });
+
+    return {
+      spreadsheetId,
+      spreadsheetUrl,
+    };
+  } catch (error) {
+    console.error('Error creating spreadsheet:', error);
+    throw error;
+  }
+}
+
+/**
  * Yeni bir schedule row ekler
  */
 export async function appendScheduleRow(row: ScheduleRow): Promise<void> {
