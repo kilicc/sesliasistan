@@ -224,6 +224,21 @@ export async function createSpreadsheet(): Promise<{ spreadsheetId: string; spre
   } catch (error: any) {
     console.error('Error creating spreadsheet:', error);
     
+    // Read service account email from file
+    let serviceAccountEmail = 'Service Account email';
+    try {
+      const serviceAccountPath = process.env.GOOGLE_SERVICE_ACCOUNT_PATH || './service-account.json';
+      const absolutePath = path.isAbsolute(serviceAccountPath) 
+        ? serviceAccountPath 
+        : path.join(process.cwd(), serviceAccountPath);
+      if (fs.existsSync(absolutePath)) {
+        const serviceAccount = JSON.parse(fs.readFileSync(absolutePath, 'utf8'));
+        serviceAccountEmail = serviceAccount.client_email || serviceAccountEmail;
+      }
+    } catch (e) {
+      // Ignore errors reading service account
+    }
+    
     // Provide more detailed error messages
     if (error.code === 'ENOENT') {
       throw new Error(`Service account dosyası bulunamadı: ${error.path}`);
@@ -233,9 +248,11 @@ export async function createSpreadsheet(): Promise<{ spreadsheetId: string; spre
         `Google Sheets API erişim hatası (403).\n\n` +
         `Yapılacaklar:\n` +
         `1. Google Cloud Console'da projenize gidin: https://console.cloud.google.com/\n` +
-        `2. "APIs & Services" > "Library" bölümüne gidin\n` +
-        `3. "Google Sheets API"yi arayın ve "ENABLE" butonuna tıklayın\n` +
-        `4. Service Account email'ini kontrol edin: sesliasistan@my-project-1470667591660.iam.gserviceaccount.com\n\n` +
+        `2. Projeyi seçin: sesliasistan-479211\n` +
+        `3. "APIs & Services" > "Library" bölümüne gidin\n` +
+        `4. "Google Sheets API"yi arayın ve "ENABLE" butonuna tıklayın\n` +
+        `5. Service Account email'ini kontrol edin: ${serviceAccountEmail}\n\n` +
+        `Hızlı link: https://console.cloud.google.com/apis/library/sheets.googleapis.com?project=sesliasistan-479211\n\n` +
         `Hata detayı: ${detailedError}`
       );
     } else if (error.code === 401 || error.response?.status === 401) {

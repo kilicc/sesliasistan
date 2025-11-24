@@ -14,7 +14,7 @@ export async function POST() {
         instructions: [
           `1. .env dosyasına şu satırı ekleyin:`,
           `   GOOGLE_SHEET_ID=${result.spreadsheetId}`,
-          `2. Service Account email'ini (sesliasistan@my-project-1470667591660.iam.gserviceaccount.com) Sheet'e Editor olarak ekleyin`,
+          `2. Service Account email'ini Sheet'e Editor olarak ekleyin (email yukarıda gösterilecek)`,
           `3. Sheet hazır! Config sheet'i otomatik olarak oluşturuldu.`,
         ],
       },
