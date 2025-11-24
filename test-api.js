@@ -13,9 +13,16 @@ async function testAPI() {
     console.log('   Project ID:', serviceAccount.project_id);
     console.log('');
     
-    const auth = new google.auth.GoogleAuth({
-      keyFile: serviceAccountPath,
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    // Try JWT authentication
+    const auth = new google.auth.JWT({
+      email: serviceAccount.client_email,
+      key: serviceAccount.private_key,
+      scopes: [
+        'https://www.googleapis.com/auth/spreadsheets',
+        'https://www.googleapis.com/auth/drive',
+        'https://www.googleapis.com/auth/drive.file',
+      ],
+      projectId: serviceAccount.project_id,
     });
     
     const sheets = google.sheets({ version: 'v4', auth });

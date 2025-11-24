@@ -21,12 +21,19 @@ function getSheetsClient() {
 
   // Try different authentication methods
   try {
-    const auth = new google.auth.GoogleAuth({
-      keyFile: absolutePath,
+    // Read service account credentials
+    const serviceAccount = JSON.parse(fs.readFileSync(absolutePath, 'utf8'));
+    
+    // Create JWT auth with explicit credentials
+    const auth = new google.auth.JWT({
+      email: serviceAccount.client_email,
+      key: serviceAccount.private_key,
       scopes: [
         'https://www.googleapis.com/auth/spreadsheets',
         'https://www.googleapis.com/auth/drive',
+        'https://www.googleapis.com/auth/drive.file',
       ],
+      projectId: serviceAccount.project_id,
     });
 
     sheets = google.sheets({ version: 'v4', auth });
