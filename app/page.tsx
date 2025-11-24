@@ -66,10 +66,16 @@ export default function Home() {
             <button
               onClick={handleCreateSheet}
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded transition-colors"
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded transition-colors mb-3"
             >
               {loading ? 'Oluşturuluyor...' : 'Google Sheet Oluştur'}
             </button>
+            <a
+              href="/dashboard"
+              className="block w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded transition-colors text-center"
+            >
+              📊 Dashboard'a Git
+            </a>
             {result && (
               <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded">
                 <p className="text-green-800 font-semibold text-sm mb-2">
