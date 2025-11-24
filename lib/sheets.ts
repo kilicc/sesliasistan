@@ -9,8 +9,18 @@ let sheets: any = null;
 function getSheetsClient() {
   if (sheets) return sheets;
 
+  const serviceAccountPath = process.env.GOOGLE_SERVICE_ACCOUNT_PATH || './service-account.json';
+  const absolutePath = path.isAbsolute(serviceAccountPath) 
+    ? serviceAccountPath 
+    : path.join(process.cwd(), serviceAccountPath);
+
+  // Check if file exists
+  if (!fs.existsSync(absolutePath)) {
+    throw new Error(`Service account dosyası bulunamadı: ${absolutePath}\nLütfen .env dosyasında GOOGLE_SERVICE_ACCOUNT_PATH değerini kontrol edin.`);
+  }
+
   const auth = new google.auth.GoogleAuth({
-    keyFile: process.env.GOOGLE_SERVICE_ACCOUNT_PATH || './service-account.json',
+    keyFile: absolutePath,
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   });
 
@@ -217,10 +227,23 @@ export async function createSpreadsheet(): Promise<{ spreadsheetId: string; spre
     // Provide more detailed error messages
     if (error.code === 'ENOENT') {
       throw new Error(`Service account dosyası bulunamadı: ${error.path}`);
-    } else if (error.code === 403) {
-      throw new Error('Google Sheets API erişim hatası. Service Account\'a Google Sheets API izni verilmiş mi kontrol edin.');
-    } else if (error.code === 401) {
-      throw new Error('Kimlik doğrulama hatası. Service account JSON dosyası geçerli mi kontrol edin.');
+    } else if (error.code === 403 || error.response?.status === 403) {
+      const detailedError = error.response?.data?.error?.message || error.message;
+      throw new Error(
+        `Google Sheets API erişim hatası (403).\n\n` +
+        `Yapılacaklar:\n` +
+        `1. Google Cloud Console'da projenize gidin: https://console.cloud.google.com/\n` +
+        `2. "APIs & Services" > "Library" bölümüne gidin\n` +
+        `3. "Google Sheets API"yi arayın ve "ENABLE" butonuna tıklayın\n` +
+        `4. Service Account email'ini kontrol edin: sesliasistan@my-project-1470667591660.iam.gserviceaccount.com\n\n` +
+        `Hata detayı: ${detailedError}`
+      );
+    } else if (error.code === 401 || error.response?.status === 401) {
+      throw new Error(
+        `Kimlik doğrulama hatası (401).\n\n` +
+        `Service account JSON dosyası geçerli mi kontrol edin.\n` +
+        `Hata: ${error.message}`
+      );
     } else if (error.message) {
       throw new Error(`Google Sheets hatası: ${error.message}`);
     } else {
