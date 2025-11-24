@@ -1,0 +1,56 @@
+version: 1
+rules:
+
+  # 1 — Proje Teknolojileri
+  - name: Project Technology
+    description: |
+      Bu proje sadece Next.js 16, TypeScript, TailwindCSS ve Google Sheets API kullanmalıdır.
+      Hiçbir şekilde farklı framework, farklı backend veya farklı veri kaynağı kullanılmayacaktır.
+    match: "**/*"
+    expect:
+      - "Use ONLY Next.js 16 (App Router)."
+      - "Use ONLY TypeScript."
+      - "Use Google Sheets API as the sole data storage."
+      - "No database such as MySQL, Mongo, Supabase, Postgres, Prisma runtime etc."
+      - "All backend logic must be inside Next.js server routes."
+      - "No client-side database operations."
+
+  # 2 — Build Zorunluluğu
+  - name: Post-Change Build Rule
+    description: Her dosya değişikliğinden sonra mutlaka build alınmalıdır.
+    match: "**/*"
+    expect:
+      - "After each change, run: npm run build"
+      - "Proceed only if build is successful."
+
+  # 3 — Github Push Kuralı
+  - name: GitHub Auto Push
+    description: Build başarılı olduğunda otomatik GitHub push yapılmalıdır.
+    match: "**/*"
+    expect:
+      - "If build succeeds, run: git add ."
+      - "git commit -m 'auto: update by cursor'"
+      - "git push origin main"
+      - "GitHub repo: https://github.com/kilicc/sesliasistan.git"
+
+  # 4 — Kod Kalitesi
+  - name: Code Quality
+    description: |
+      Kodlar temiz, okunabilir ve TypeScript standartlarına uygun olmalıdır.
+      Google Sheets API fonksiyonları ayrı lib klasöründe olmalıdır.
+    match: "**/*"
+    expect:
+      - "All functions must be fully typed in TypeScript."
+      - "Use /lib/sheets.ts for Google Sheets operations."
+      - "Use /lib/slot.ts for slot logic."
+      - "Use proper error handling."
+
+  # 5 — Retell AI API Entegrasyonu
+  - name: Retell Integration
+    description: Retell AI sadece /api/schedule endpointini kullanmalıdır.
+    match: "app/api/schedule/*"
+    expect:
+      - "Accept JSON from Retell."
+      - "Call Google Sheets functions to compute availability."
+      - "Respond strictly in JSON format."
+
