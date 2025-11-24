@@ -6,12 +6,31 @@ import {
   findAvailableSlot,
 } from '@/lib/slot';
 import { ScheduleRequest, ScheduleResponse, ScheduleRow } from '@/lib/types';
+import { verifyRetellSignature, getRetellSignature } from '@/lib/retell';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   
   try {
-    const body: ScheduleRequest = await request.json();
+    // Get raw body for signature verification
+    const rawBody = await request.text();
+    const body: ScheduleRequest = JSON.parse(rawBody);
+
+    // Verify Retell AI webhook signature (if public key is configured)
+    const retellPublicKey = process.env.RETELL_PUBLIC_KEY;
+    const signature = getRetellSignature(request.headers);
+    
+    if (retellPublicKey) {
+      const isValid = verifyRetellSignature(rawBody, signature, retellPublicKey);
+      if (!isValid) {
+        console.warn('[Schedule API] Invalid Retell AI signature');
+        return NextResponse.json(
+          { error: 'Invalid signature', result: 'error' },
+          { status: 401 }
+        );
+      }
+      console.log('[Schedule API] Retell AI signature verified');
+    }
 
     // Log incoming request (without sensitive data)
     console.log('[Schedule API] Request received:', {
