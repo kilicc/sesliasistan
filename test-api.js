@@ -44,13 +44,32 @@ async function testAPI() {
   } catch (error) {
     console.error('❌ HATA:', error.message);
     console.log('');
+    console.log('📋 Detaylı Hata Bilgisi:');
+    console.log('   Code:', error.code);
+    console.log('   Response:', error.response?.status, error.response?.statusText);
+    if (error.response?.data) {
+      console.log('   Error Details:', JSON.stringify(error.response.data, null, 2));
+    }
+    console.log('');
     
     if (error.code === 403) {
-      console.log('🔧 ÇÖZÜM:');
-      console.log('   1. https://console.cloud.google.com/apis/library/sheets.googleapis.com?project=sesliasistan-479211');
-      console.log('   2. "ENABLE" butonuna tıklayın');
-      console.log('   3. Birkaç saniye bekleyin');
-      console.log('   4. Bu scripti tekrar çalıştırın: node test-api.js');
+      console.log('🔧 ÇÖZÜM - API etkin ama izin sorunu var:');
+      console.log('');
+      console.log('1. Service Account IAM Rollerini Kontrol Edin:');
+      console.log('   https://console.cloud.google.com/iam-admin/iam?project=sesliasistan-479211');
+      console.log('   - sesli2asistan@sesliasistan-479211.iam.gserviceaccount.com');
+      console.log('   - En azından "Editor" veya "Service Account User" rolü olmalı');
+      console.log('');
+      console.log('2. Service Account Detaylarını Kontrol Edin:');
+      console.log('   https://console.cloud.google.com/iam-admin/serviceaccounts?project=sesliasistan-479211');
+      console.log('   - Service Account\'un aktif olduğundan emin olun');
+      console.log('');
+      console.log('3. API Etkinleştirme Kontrolü:');
+      console.log('   https://console.cloud.google.com/apis/dashboard?project=sesliasistan-479211');
+      console.log('   - "Google Sheets API" listede görünüyor mu kontrol edin');
+      console.log('');
+      console.log('4. Billing Kontrolü (gerekirse):');
+      console.log('   - Bazı API\'ler için billing aktif olmalı');
     } else if (error.code === 401) {
       console.log('🔧 ÇÖZÜM: Service Account JSON dosyası geçersiz olabilir.');
     } else {
