@@ -19,13 +19,22 @@ function getSheetsClient() {
     throw new Error(`Service account dosyası bulunamadı: ${absolutePath}\nLütfen .env dosyasında GOOGLE_SERVICE_ACCOUNT_PATH değerini kontrol edin.`);
   }
 
-  const auth = new google.auth.GoogleAuth({
-    keyFile: absolutePath,
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-  });
+  // Try different authentication methods
+  try {
+    const auth = new google.auth.GoogleAuth({
+      keyFile: absolutePath,
+      scopes: [
+        'https://www.googleapis.com/auth/spreadsheets',
+        'https://www.googleapis.com/auth/drive',
+      ],
+    });
 
-  sheets = google.sheets({ version: 'v4', auth });
-  return sheets;
+    sheets = google.sheets({ version: 'v4', auth });
+    return sheets;
+  } catch (error) {
+    console.error('Auth initialization error:', error);
+    throw error;
+  }
 }
 
 /**
