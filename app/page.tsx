@@ -22,7 +22,9 @@ export default function Home() {
       if (data.success) {
         setResult(data);
       } else {
-        setError(data.error || 'Bir hata oluştu');
+        const errorMsg = data.details || data.error || 'Bir hata oluştu';
+        setError(errorMsg);
+        console.error('Sheet creation error:', data);
       }
     } catch (err) {
       setError('Sheet oluşturulurken bir hata oluştu');
@@ -98,7 +100,11 @@ export default function Home() {
             )}
             {error && (
               <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded">
-                <p className="text-red-800 text-sm">{error}</p>
+                <p className="text-red-800 font-semibold text-sm mb-1">❌ Hata:</p>
+                <p className="text-red-700 text-sm">{error}</p>
+                <p className="text-red-600 text-xs mt-2">
+                  Lütfen service-account.json dosyasının doğru yolda olduğundan ve Google Sheets API'nin aktif olduğundan emin olun.
+                </p>
               </div>
             )}
           </div>

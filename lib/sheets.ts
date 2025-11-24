@@ -1,5 +1,7 @@
 import { google } from 'googleapis';
 import { Config, ScheduleRow } from './types';
+import fs from 'fs';
+import path from 'path';
 
 // Google Sheets API client initialization
 let sheets: any = null;
@@ -119,6 +121,16 @@ export async function getWeeklySchedule(weekKey: string): Promise<ScheduleRow[]>
  */
 export async function createSpreadsheet(): Promise<{ spreadsheetId: string; spreadsheetUrl: string }> {
   try {
+    // Check if service account file exists
+    const serviceAccountPath = process.env.GOOGLE_SERVICE_ACCOUNT_PATH || './service-account.json';
+    const absolutePath = path.isAbsolute(serviceAccountPath) 
+      ? serviceAccountPath 
+      : path.join(process.cwd(), serviceAccountPath);
+    
+    if (!fs.existsSync(absolutePath)) {
+      throw new Error(`Service account dosyası bulunamadı: ${absolutePath}`);
+    }
+
     const sheetsClient = getSheetsClient();
 
     // Create new spreadsheet
@@ -199,9 +211,21 @@ export async function createSpreadsheet(): Promise<{ spreadsheetId: string; spre
       spreadsheetId,
       spreadsheetUrl,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating spreadsheet:', error);
-    throw error;
+    
+    // Provide more detailed error messages
+    if (error.code === 'ENOENT') {
+      throw new Error(`Service account dosyası bulunamadı: ${error.path}`);
+    } else if (error.code === 403) {
+      throw new Error('Google Sheets API erişim hatası. Service Account\'a Google Sheets API izni verilmiş mi kontrol edin.');
+    } else if (error.code === 401) {
+      throw new Error('Kimlik doğrulama hatası. Service account JSON dosyası geçerli mi kontrol edin.');
+    } else if (error.message) {
+      throw new Error(`Google Sheets hatası: ${error.message}`);
+    } else {
+      throw new Error(`Bilinmeyen hata: ${JSON.stringify(error)}`);
+    }
   }
 }
 

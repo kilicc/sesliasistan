@@ -22,11 +22,16 @@ export async function POST() {
     );
   } catch (error) {
     console.error('Error creating sheet:', error);
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorDetails = error instanceof Error ? error.stack : String(error);
+    
     return NextResponse.json(
       {
         success: false,
         error: 'Sheet oluşturulurken hata oluştu',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        details: errorMessage,
+        stack: process.env.NODE_ENV === 'development' ? errorDetails : undefined,
       },
       { status: 500 }
     );
