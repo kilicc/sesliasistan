@@ -73,16 +73,40 @@ Retell AI, arama sonrasında öğrenciden topladığı bilgileri JSON formatınd
 
 ## Retell AI Konfigürasyonu
 
-### 1. Retell AI Dashboard'da Webhook Ayarlama
+### 1. Webhook URL'ini Hazırlama
 
-1. Retell AI Dashboard'a gidin
-2. Agent ayarlarına gidin
-3. Webhook URL'ini ayarlayın:
-   ```
-   https://your-domain.com/api/schedule
-   ```
-4. Webhook method: `POST`
-5. Content-Type: `application/json`
+#### Development (Local)
+ngrok veya benzeri tunnel tool kullanın:
+```bash
+# ngrok kurulumu
+npm install -g ngrok
+
+# Next.js server çalıştırın
+npm run dev
+
+# Başka bir terminalde ngrok başlatın
+ngrok http 3000
+```
+
+ngrok size bir URL verecek, örneğin: `https://abc123.ngrok.io`
+
+Webhook URL'iniz: `https://abc123.ngrok.io/api/schedule`
+
+#### Production
+Domain'iniz varsa: `https://your-domain.com/api/schedule`
+
+### 2. Retell AI Dashboard'da Webhook Ayarlama
+
+1. Retell AI Dashboard'a gidin: https://platform.retellai.com/
+2. Agent oluşturun veya mevcut agent'ı düzenleyin
+3. **"Webhooks"** veya **"Functions"** sekmesine gidin
+4. **"Add Webhook"** butonuna tıklayın
+5. Webhook URL'ini girin (yukarıdaki adımdan)
+6. Method: `POST`
+7. Content-Type: `application/json`
+8. Kaydedin
+
+**Detaylı rehber için:** `WEBHOOK_KURULUM_REHBERI.md` dosyasına bakın
 
 ### 2. Retell AI Function Calling
 
