@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "setup:check": "./scripts/check-setup.sh",
+    "setup:ngrok": "./scripts/setup-ngrok.sh",
     "setup:webhook": "./scripts/setup-webhook.sh",
     "test:webhook": "./scripts/test-webhook.sh"
   },

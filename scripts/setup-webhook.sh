@@ -19,28 +19,69 @@ if ! command -v ngrok &> /dev/null; then
 fi
 
 echo "✅ ngrok bulundu"
-echo ""
 
-# Check if Next.js server is running
-if ! curl -s http://localhost:3000 > /dev/null; then
-    echo "⚠️  Next.js server çalışmıyor (http://localhost:3000)"
+# Check ngrok authtoken
+if ! ngrok config check &> /dev/null; then
     echo ""
-    echo "📝 Server'ı başlatmak için:"
-    echo "   npm run dev"
+    echo "⚠️  ngrok authtoken yapılandırılmamış!"
     echo ""
-    read -p "Server'ı şimdi başlatmak ister misiniz? (y/n) " -n 1 -r
+    echo "📝 ngrok authtoken kurulumu:"
+    echo "   1. https://dashboard.ngrok.com/signup adresinden ücretsiz hesap oluşturun"
+    echo "   2. https://dashboard.ngrok.com/get-started/your-authtoken adresinden authtoken'ı kopyalayın"
+    echo "   3. Şu komutu çalıştırın:"
+    echo "      ngrok config add-authtoken YOUR_AUTHTOKEN"
+    echo ""
+    read -p "Authtoken'ı şimdi girmek ister misiniz? (y/n) " -n 1 -r
     echo ""
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo "🔄 Server başlatılıyor..."
-        npm run dev &
-        sleep 5
+        read -p "ngrok authtoken'ınızı girin: " AUTHTOKEN
+        ngrok config add-authtoken "$AUTHTOKEN"
+        if [ $? -eq 0 ]; then
+            echo "✅ ngrok authtoken başarıyla eklendi!"
+        else
+            echo "❌ ngrok authtoken eklenemedi"
+            exit 1
+        fi
     else
-        echo "❌ Server çalışmıyor, devam edilemiyor"
+        echo "❌ ngrok authtoken olmadan devam edilemiyor"
         exit 1
     fi
 fi
 
-echo "✅ Next.js server çalışıyor"
+echo "✅ ngrok yapılandırılmış"
+echo ""
+
+# Check if Next.js server is running (try both ports)
+SERVER_PORT=3000
+if ! curl -s http://localhost:3000 > /dev/null; then
+    if curl -s http://localhost:3001 > /dev/null; then
+        SERVER_PORT=3001
+        echo "✅ Next.js server çalışıyor (port 3001)"
+    else
+        echo "⚠️  Next.js server çalışmıyor (http://localhost:3000 veya 3001)"
+        echo ""
+        echo "📝 Server'ı başlatmak için:"
+        echo "   npm run dev"
+        echo ""
+        read -p "Server'ı şimdi başlatmak ister misiniz? (y/n) " -n 1 -r
+        echo ""
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            echo "🔄 Server başlatılıyor..."
+            npm run dev > /dev/null 2>&1 &
+            sleep 5
+            # Check which port is being used
+            if curl -s http://localhost:3001 > /dev/null; then
+                SERVER_PORT=3001
+            fi
+        else
+            echo "❌ Server çalışmıyor, devam edilemiyor"
+            exit 1
+        fi
+    fi
+else
+    echo "✅ Next.js server çalışıyor (port 3000)"
+fi
+
 echo ""
 
 # Start ngrok
@@ -52,7 +93,7 @@ pkill ngrok 2>/dev/null
 sleep 2
 
 # Start ngrok in background
-ngrok http 3000 > /tmp/ngrok.log 2>&1 &
+ngrok http $SERVER_PORT > /tmp/ngrok.log 2>&1 &
 NGROK_PID=$!
 
 echo "⏳ ngrok başlatılıyor (5 saniye bekleniyor)..."
