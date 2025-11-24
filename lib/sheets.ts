@@ -159,6 +159,20 @@ export async function createSpreadsheet(): Promise<{ spreadsheetId: string; spre
 
     const sheetsClient = getSheetsClient();
 
+    // Check if GOOGLE_SHEET_ID is set - use existing sheet
+    const existingSheetId = process.env.GOOGLE_SHEET_ID;
+    if (existingSheetId) {
+      // Verify access to existing sheet
+      const existingSheet = await sheetsClient.spreadsheets.get({
+        spreadsheetId: existingSheetId,
+      });
+      
+      return {
+        spreadsheetId: existingSheetId,
+        spreadsheetUrl: `https://docs.google.com/spreadsheets/d/${existingSheetId}`,
+      };
+    }
+
     // Create new spreadsheet
     const response = await sheetsClient.spreadsheets.create({
       requestBody: {
