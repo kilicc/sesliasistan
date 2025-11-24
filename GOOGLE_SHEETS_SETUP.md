@@ -5,15 +5,15 @@
 ### Adım 1: Google Sheets API'yi Etkinleştirin
 
 1. [Google Cloud Console](https://console.cloud.google.com/) adresine gidin
-2. Projenizi seçin: `my-project-1470667591660`
+2. Projenizi seçin: **`sesliasistan-479211`**
 3. Sol menüden **"APIs & Services"** > **"Library"** seçin
 4. Arama kutusuna **"Google Sheets API"** yazın
 5. **"Google Sheets API"** seçeneğine tıklayın
-6. **"ENABLE"** butonuna tıklayın
+6. **"ENABLE"** butonuna tıklayın (Eğer zaten etkinse "MANAGE" görünecek)
 
 ### Adım 2: Service Account Kontrolü
 
-Service Account email: `sesliasistan@my-project-1470667591660.iam.gserviceaccount.com`
+Service Account email: **`sesli2asistan@sesliasistan-479211.iam.gserviceaccount.com`**
 
 Bu email'in Google Sheets API'ye erişim izni olduğundan emin olun.
 
